@@ -71,15 +71,35 @@ export function TasksPage() {
     return dueDate > today;
   };
 
+  // Calculate task counts for persistent display
+  const taskCounts = useMemo(() => {
+    const overdue = tasks.filter(task =>
+      task.status !== 'completed' && isOverdue(task)
+    );
+    const today = tasks.filter(task =>
+      task.status !== 'completed' && isDueToday(task)
+    );
+    const upcoming = tasks.filter(task =>
+      task.status !== 'completed' && isUpcoming(task)
+    );
+    const completed = tasks.filter(task => task.status === 'completed');
+
+    return {
+      active: overdue.length + today.length,
+      upcoming: upcoming.length,
+      completed: completed.length
+    };
+  }, [tasks]);
+
   // Filter tasks based on current filter mode
   const filteredTasks = useMemo(() => {
     switch (filterMode) {
       case 'todo':
-        return tasks.filter(task => 
+        return tasks.filter(task =>
           task.status !== 'completed' && (isOverdue(task) || isDueToday(task))
         );
       case 'upcoming':
-        return tasks.filter(task => 
+        return tasks.filter(task =>
           task.status !== 'completed' && isUpcoming(task)
         );
       case 'done':
@@ -92,14 +112,14 @@ export function TasksPage() {
   // Group tasks for todo view (overdue and today)
   const groupedTasks = useMemo(() => {
     if (filterMode !== 'todo') return { overdue: [], today: [], upcoming: [] };
-    
-    const overdue = tasks.filter(task => 
+
+    const overdue = tasks.filter(task =>
       task.status !== 'completed' && isOverdue(task)
     );
-    const today = tasks.filter(task => 
+    const today = tasks.filter(task =>
       task.status !== 'completed' && isDueToday(task)
     );
-    const upcoming = tasks.filter(task => 
+    const upcoming = tasks.filter(task =>
       task.status !== 'completed' && isUpcoming(task)
     );
 
@@ -125,7 +145,7 @@ export function TasksPage() {
           <h1 className="text-xl font-semibold text-neutral-900 dark:text-neutral-50">
             Tasks
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">
+          <p className="text-sm font-normal text-neutral-600 dark:text-neutral-400 mt-0.5">
             Manage your tasks and stay organized
           </p>
         </div>
@@ -145,33 +165,48 @@ export function TasksPage() {
         <div className="flex items-center space-x-0.5 bg-gradient-to-r from-neutral-50 to-blue-50/30 dark:from-neutral-800 dark:to-blue-900/10 rounded-lg p-1 border border-neutral-200/50 dark:border-neutral-700/50">
           <button
             onClick={() => setFilterMode('todo')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
               filterMode === 'todo'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/25'
                 : 'text-neutral-600 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20'
             }`}
           >
-            Active ({groupedTasks.overdue.length + groupedTasks.today.length})
+            <span className="font-medium">Active</span>
+            <span className={`text-xs font-light ${
+              filterMode === 'todo' ? 'text-blue-100' : 'text-neutral-400 dark:text-neutral-500'
+            }`}>
+              {taskCounts.active}
+            </span>
           </button>
           <button
             onClick={() => setFilterMode('upcoming')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
               filterMode === 'upcoming'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/25'
                 : 'text-neutral-600 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20'
             }`}
           >
-            Upcoming ({groupedTasks.upcoming.length})
+            <span className="font-medium">Upcoming</span>
+            <span className={`text-xs font-light ${
+              filterMode === 'upcoming' ? 'text-blue-100' : 'text-neutral-400 dark:text-neutral-500'
+            }`}>
+              {taskCounts.upcoming}
+            </span>
           </button>
           <button
             onClick={() => setFilterMode('done')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
               filterMode === 'done'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/25'
                 : 'text-neutral-600 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20'
             }`}
           >
-            Completed ({tasks.filter(t => t.status === 'completed').length})
+            <span className="font-medium">Completed</span>
+            <span className={`text-xs font-light ${
+              filterMode === 'done' ? 'text-blue-100' : 'text-neutral-400 dark:text-neutral-500'
+            }`}>
+              {taskCounts.completed}
+            </span>
           </button>
         </div>
 
@@ -212,19 +247,19 @@ export function TasksPage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-orange-400 to-orange-500"></div>
-                  <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Needs Attention
+                  <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-red-400 to-red-500"></div>
+                  <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+                    Overdue
                   </h2>
                 </div>
-                <div className="px-2 py-0.5 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-full">
-                  <span className="text-xs font-medium text-orange-700 dark:text-orange-300">
+                <div className="px-2 py-0.5 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-full">
+                  <span className="text-xs font-medium text-red-700 dark:text-red-300">
                     {groupedTasks.overdue.length}
                   </span>
                 </div>
               </div>
-              <TaskList 
-                tasks={groupedTasks.overdue} 
+              <TaskList
+                tasks={groupedTasks.overdue}
                 viewMode={viewMode}
                 category="overdue"
                 onTaskClick={setSelectedTask}
@@ -238,8 +273,8 @@ export function TasksPage() {
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-blue-500"></div>
-                  <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Due Today
+                  <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+                    Today
                   </h2>
                 </div>
                 <div className="px-2 py-0.5 bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-900/20 dark:to-sky-900/20 rounded-full">
@@ -248,8 +283,8 @@ export function TasksPage() {
                   </span>
                 </div>
               </div>
-              <TaskList 
-                tasks={groupedTasks.today} 
+              <TaskList
+                tasks={groupedTasks.today}
                 viewMode={viewMode}
                 category="today"
                 onTaskClick={setSelectedTask}

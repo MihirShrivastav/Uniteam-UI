@@ -10,6 +10,8 @@ import {
   MoreHorizontal24Regular,
   Checkmark24Regular,
   Delete24Regular,
+  Flag24Filled,
+  GridDots24Regular,
 } from '@fluentui/react-icons';
 
 // Task interface
@@ -32,9 +34,10 @@ interface TaskCardProps {
   task: Task;
   viewMode: 'list' | 'card';
   category: string;
+  onTaskClick?: (task: Task) => void;
 }
 
-export function TaskCard({ task, viewMode, category }: TaskCardProps) {
+export function TaskCard({ task, viewMode, category, onTaskClick }: TaskCardProps) {
   const dispatch = useAppDispatch();
   const users = useAppSelector(state => state.teams?.members || []);
   const projects = useAppSelector(state => state.projects?.projects || []);
@@ -137,6 +140,15 @@ export function TaskCard({ task, viewMode, category }: TaskCardProps) {
         style={style}
         className="group flex items-center gap-3 p-2 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-lg border-b border-neutral-200 dark:border-neutral-700"
       >
+        {/* Drag Handle - shown on hover */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity p-1 -ml-1"
+        >
+          <GridDots24Regular className="w-4 h-4 text-neutral-400" />
+        </div>
+
         {/* Status Checkbox */}
         <button
           onClick={handleStatusToggle}
@@ -153,7 +165,7 @@ export function TaskCard({ task, viewMode, category }: TaskCardProps) {
 
         {/* Task Content */}
         <div className="flex-1 min-w-0">
-          <div onClick={() => onTaskClick(task)} className="cursor-pointer">
+          <div onClick={() => onTaskClick?.(task)} className="cursor-pointer">
             <h3 className={`text-sm font-medium truncate ${
               task.status === 'completed'
                 ? 'line-through text-neutral-400 dark:text-neutral-500'
@@ -164,25 +176,23 @@ export function TaskCard({ task, viewMode, category }: TaskCardProps) {
           </div>
         </div>
 
-        {/* Tags and Metadata */}
+        {/* Tags and Assignee - moved to right */}
         <div className="flex items-center gap-2">
-          {/* Project Tag */}
+          {/* Project Tag with filled flag icon and blue hues */}
           {project && (
-            <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
-              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-              </svg>
-              {project.name}
+            <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-[10px] rounded border border-blue-200 dark:border-blue-700">
+              <Flag24Filled className="w-2.5 h-2.5" />
+              <span className="font-medium">{project.name}</span>
             </div>
           )}
-          
-          {/* Recurring Tag */}
+
+          {/* Recurring Tag - keep green with border */}
           {task.tags.includes('recurring') && (
-            <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded">
+            <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-[10px] rounded border border-green-200 dark:border-green-700">
               <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
               </svg>
-              Weekly
+              <span className="font-medium">Weekly</span>
             </div>
           )}
 
@@ -194,23 +204,6 @@ export function TaskCard({ task, viewMode, category }: TaskCardProps) {
               </span>
             </div>
           )}
-
-          {/* Drag Handle */}
-          <div
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <MoreHorizontal24Regular className="w-4 h-4 text-neutral-500" />
-          </div>
-
-          {/* Delete Button */}
-          <button
-            onClick={handleDelete}
-            className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 p-1 rounded-lg"
-          >
-            <Delete24Regular className="w-4 h-4" />
-          </button>
         </div>
       </div>
     );
@@ -232,13 +225,13 @@ export function TaskCard({ task, viewMode, category }: TaskCardProps) {
         }`}></div>
 
         <div className="p-3">
-          {/* Drag Handle */}
+          {/* Drag Handle - shown on hover */}
           <div
             {...attributes}
             {...listeners}
-            className="absolute top-2 right-2 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg"
+            className="absolute top-2 left-2 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg"
           >
-            <MoreHorizontal24Regular className="w-4 h-4 text-neutral-500" />
+            <GridDots24Regular className="w-4 h-4 text-neutral-400" />
           </div>
 
           {/* Status Checkbox and Task Content */}
@@ -257,7 +250,7 @@ export function TaskCard({ task, viewMode, category }: TaskCardProps) {
             </button>
 
             <div className="flex-1 min-w-0">
-              <div onClick={() => onTaskClick(task)} className="cursor-pointer">
+              <div onClick={() => onTaskClick?.(task)} className="cursor-pointer">
                 <h3 className={`text-sm font-medium ${
                   task.status === 'completed'
                     ? 'line-through text-neutral-400 dark:text-neutral-500'
@@ -266,7 +259,7 @@ export function TaskCard({ task, viewMode, category }: TaskCardProps) {
                   {task.title}
                 </h3>
                 {task.description && (
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">
+                  <p className="text-xs font-normal text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">
                     {task.description}
                   </p>
                 )}
@@ -275,31 +268,26 @@ export function TaskCard({ task, viewMode, category }: TaskCardProps) {
 
           </div>
 
-          {/* Tags and Metadata */}
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            {/* Project Tag */}
+          {/* Tags and Assignee - moved to right side */}
+          <div className="flex items-center justify-end gap-2 mt-3">
+            {/* Project Tag with filled flag icon and blue hues */}
             {project && (
-              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
-                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-                </svg>
-                {project.name}
+              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-[10px] rounded border border-blue-200 dark:border-blue-700">
+                <Flag24Filled className="w-2.5 h-2.5" />
+                <span className="font-medium">{project.name}</span>
               </div>
             )}
-            
-            {/* Recurring Tag */}
-            {task.tags.includes('recurring') && (
-              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded">
-                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-                </svg>
-                Weekly
-              </div>
-            )}
-          </div>
 
-          {/* Footer with Assignee and Actions */}
-          <div className="flex items-center justify-between mt-3 pt-2 border-t border-neutral-100 dark:border-neutral-700">
+            {/* Recurring Tag - keep green with border */}
+            {task.tags.includes('recurring') && (
+              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-[10px] rounded border border-green-200 dark:border-green-700">
+                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">Weekly</span>
+              </div>
+            )}
+
             {/* Assignee */}
             {assignee && (
               <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
@@ -308,14 +296,6 @@ export function TaskCard({ task, viewMode, category }: TaskCardProps) {
                 </span>
               </div>
             )}
-
-            {/* Delete Button */}
-            <button
-              onClick={handleDelete}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 p-1 rounded-lg"
-            >
-              <Delete24Regular className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </div>

@@ -73,7 +73,7 @@ function App() {
           <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50">
             Dashboard
           </h1>
-          <p className="text-base text-neutral-600 dark:text-neutral-400 mt-1">
+          <p className="text-base font-normal text-neutral-600 dark:text-neutral-400 mt-1">
             Welcome back! Here's what's happening with your projects and tasks today.
           </p>
         </div>
@@ -85,7 +85,7 @@ function App() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Active Tasks</p>
-                  <p className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50 mt-2">{activeTasks}</p>
+                  <p className="text-2xl font-bold text-neutral-900 dark:text-neutral-50 mt-2">{activeTasks}</p>
                 </div>
                 <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center">
                   <svg className="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
